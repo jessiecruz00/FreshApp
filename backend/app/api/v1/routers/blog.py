@@ -49,7 +49,19 @@ async def get_post(
     return post
 
 
-# Admin only
+# Admin only (more specific route first so "/admin/list" is not captured as post_id)
+@router.get("/admin/list", response_model=BlogPostListResponse)
+async def admin_list_posts(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = RequireAdmin,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=500),
+    search: str | None = Query(None),
+):
+    items, total = await blog_service.list_posts(db, skip=skip, limit=limit, search=search, public_only=False)
+    return BlogPostListResponse(items=[BlogPostResponse.model_validate(p) for p in items], total=total)
+
+
 @router.get("/admin/{post_id}", response_model=BlogPostResponse)
 async def admin_get_post(
     post_id: int,
@@ -60,18 +72,6 @@ async def admin_get_post(
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     return post
-
-
-@router.get("/admin/list", response_model=BlogPostListResponse)
-async def admin_list_posts(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = RequireAdmin,
-    skip: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100),
-    search: str | None = Query(None),
-):
-    items, total = await blog_service.list_posts(db, skip=skip, limit=limit, search=search, public_only=False)
-    return BlogPostListResponse(items=[BlogPostResponse.model_validate(p) for p in items], total=total)
 
 
 @router.post("", response_model=BlogPostResponse, status_code=status.HTTP_201_CREATED)

@@ -22,6 +22,32 @@ settings = get_settings()
 
 
 async def login(db: AsyncSession, data: LoginRequest) -> User | None:
+    # Super admin from .env: get-or-create admin user when email + password match
+    if settings.super_admin_email and settings.super_admin_password:
+        if data.email == settings.super_admin_email and data.password == settings.super_admin_password:
+            result = await db.execute(select(User).where(User.email == settings.super_admin_email))
+            user = result.scalar_one_or_none()
+            if user:
+                user.role = UserRole.ADMIN
+                user.hashed_password = get_password_hash(settings.super_admin_password)
+                user.is_verified = True
+                user.is_active = True
+                await db.flush()
+                await db.refresh(user)
+                return user
+            user = User(
+                email=settings.super_admin_email,
+                hashed_password=get_password_hash(settings.super_admin_password),
+                full_name=settings.super_admin_name or settings.super_admin_email.split("@")[0],
+                role=UserRole.ADMIN,
+                is_verified=True,
+            )
+            db.add(user)
+            await db.flush()
+            db.add(UserSetting(user_id=user.id))
+            await db.refresh(user)
+            return user
+
     result = await db.execute(select(User).where(User.email == data.email))
     user = result.scalar_one_or_none()
     if not user or not user.hashed_password or not verify_password(data.password, user.hashed_password):

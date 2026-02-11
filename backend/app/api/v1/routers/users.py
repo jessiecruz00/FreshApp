@@ -17,7 +17,7 @@ async def list_users(
     db: AsyncSession = Depends(get_db),
     current_user: User = RequireAdmin,
     skip: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=500),
     search: str | None = Query(None),
 ):
     items, total = await user_service.list_users(db, skip=skip, limit=limit, search=search)

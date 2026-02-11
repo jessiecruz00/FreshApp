@@ -61,6 +61,11 @@ class Settings(BaseSettings):
     sendgrid_from_name: str = "FreshApp"
     frontend_url: str = "http://localhost:3000"
 
+    # Super admin: login with this email + password to get an admin user (get-or-create)
+    super_admin_email: Optional[str] = None
+    super_admin_password: Optional[str] = None
+    super_admin_name: str = "Super Admin"
+
 
 @lru_cache
 def get_settings() -> Settings:

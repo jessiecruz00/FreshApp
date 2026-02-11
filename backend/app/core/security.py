@@ -8,21 +8,16 @@ from passlib.context import CryptContext
 from app.config import get_settings
 
 settings = get_settings()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-def _password_bytes(password: str) -> bytes:
-    """Truncate to 72 bytes (bcrypt limit). pyca/bcrypt raises if exceeded."""
-    return password.encode("utf-8")[:72]
+# bcrypt_sha256 pre-hashes with HMAC-SHA256 (32 bytes) before bcrypt - no 72-byte limit
+pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(_password_bytes(plain), hashed)
+    return pwd_context.verify(plain, hashed)
 
 
 def get_password_hash(password: str) -> str:
-    """Hash password with bcrypt. Truncates to 72 bytes (bcrypt limit)."""
-    return pwd_context.hash(_password_bytes(password))
+    return pwd_context.hash(password)
 
 
 def create_access_token(subject: str | int, extra: dict[str, Any] | None = None) -> str:

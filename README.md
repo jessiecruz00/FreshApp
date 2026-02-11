@@ -54,9 +54,13 @@ npm run dev
 
 - App: http://localhost:3000  
 
-### 4. First admin user
+### 4. First admin user (super admin via .env)
 
-Create a user (signup or DB insert), then set `role = 'admin'` in the `users` table for that user.
+In `.env`, set super admin credentials. Log in with that email and password; the user is created as admin if it doesn’t exist:
+
+- `SUPER_ADMIN_EMAIL` – e.g. `admin@example.com`
+- `SUPER_ADMIN_PASSWORD` – secure password
+- `SUPER_ADMIN_NAME` (optional) – display name, default `Super Admin`
 
 ## Env (backend)
 
@@ -64,6 +68,7 @@ Create a user (signup or DB insert), then set `role = 'admin'` in the `users` ta
 |----------|-------------|
 | `MYSQL_*` | MySQL connection |
 | `SECRET_KEY` | JWT signing (use `openssl rand -hex 32`) |
+| `SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD`, `SUPER_ADMIN_NAME` | Super admin login (user get-or-create as admin) |
 | `SENDGRID_API_KEY` | SendGrid (verification/invite emails) |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` | Google OAuth |
 | `FRONTEND_URL` | Base URL for verification/invite links |
